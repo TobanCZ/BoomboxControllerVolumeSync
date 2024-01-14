@@ -1,0 +1,10 @@
+{
+    "name": "Boombox Controller Volume Sync",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/TobanCZ/BoomboxControllerVolumeSync",
+    "description": "Lethal Company mod that adds volume synchronization to Boombox Controller mod",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2100",
+        "KoderTeh-Boombox_Controller-1.1.8"
+    ]
+}
