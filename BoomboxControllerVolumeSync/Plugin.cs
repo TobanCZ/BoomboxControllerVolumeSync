@@ -15,7 +15,7 @@ namespace BoomboxControllerVolumeSync
     {
         private const string modGUID = "TobanCZ.BoomboxControllerVolumeSync";
         private const string modName = "Boombox Controller Volume Sync";
-        private const string modVersion = "0.1.0.0";
+        private const string modVersion = "1.0.0";
 
         private readonly Harmony harmony = new Harmony(modGUID);
 
@@ -32,10 +32,6 @@ namespace BoomboxControllerVolumeSync
             }
 
             mls = BepInEx.Logging.Logger.CreateLogSource(modGUID);
-
-            volumeSync = new GameObject();
-            volumeSync.AddComponent<VolumeSync>();
-
             mls.LogInfo("The Boombox Controller Volume Sync has been loaded.");
 
             harmony.PatchAll(typeof(Plugin));
