@@ -28,7 +28,7 @@ namespace BoomboxControllerVolumeSync
         {
             if (IsServer)
             {
-                ActivateVolumeSyncClientOnJoinRpc(playerId, syncedVolume);
+                ActivateVolumeSyncOnJoinClientRpc(playerId, syncedVolume);
             }
         }
 
@@ -46,7 +46,7 @@ namespace BoomboxControllerVolumeSync
         }
 
         [ClientRpc]
-        public void ActivateVolumeSyncClientOnJoinRpc(ulong targetPlayerId, float newVolume)
+        public void ActivateVolumeSyncOnJoinClientRpc(ulong targetPlayerId, float newVolume)
         {
             if (IsClient && NetworkManager.Singleton.LocalClientId == targetPlayerId)
             {
