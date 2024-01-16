@@ -1,43 +1,44 @@
 ﻿using HarmonyLib;
+
 using Unity.Netcode;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.Networking;
+using System.Reflection;
+
 
 namespace BoomboxControllerVolumeSync
 {
     internal class GameNetworkManagerPatch
     {
 
-        private static GameObject _networkPrefab = null;
+        private static GameObject networkPrefab = null;
 
         [HarmonyPatch(typeof(GameNetworkManager), "Start")]
         [HarmonyPostfix]
         private static void Init()
         {
-            if (_networkPrefab != null)
+            if (networkPrefab != null)
                 return;
 
-            var disabledPrefab = new GameObject("VolumeSyncContainer") { hideFlags = HideFlags.HideAndDontSave };
-            disabledPrefab.SetActive(false);
+            AssetBundle data = AssetBundle.LoadFromMemory(Properties.Resources.boomboxcontrollervolumesync);
+            networkPrefab = data.LoadAsset<GameObject>("Assets/BoomboxVolumeSyncHandler.prefab");
+            networkPrefab.AddComponent<VolumeSync>();
 
-            var prefab = new GameObject("VolumeSyncHandler");
-            prefab.transform.SetParent(disabledPrefab.transform);
-            prefab.AddComponent<NetworkObject>();
-            prefab.AddComponent<VolumeSync>();
-            prefab.hideFlags = HideFlags.HideAndDontSave;
-            NetworkManager.Singleton.AddNetworkPrefab(prefab);
-            _networkPrefab = prefab;
+            NetworkManager.Singleton.AddNetworkPrefab(networkPrefab);
         }
+
 
         [HarmonyPatch(typeof(StartOfRound), "Awake")]
         [HarmonyPostfix]
         private static void SpawnNetworkHandler()
         {
-            if (!NetworkManager.Singleton.IsHost && !NetworkManager.Singleton.IsServer) return;
-
-            var networkHandlerHost = UnityEngine.Object.Instantiate(_networkPrefab, Vector3.zero, Quaternion.identity, StartOfRound.Instance.transform);
-            networkHandlerHost.GetComponent<NetworkObject>().Spawn();
-
-            Plugin.mls.LogInfo("VolumeSyncHandler has been created.");
+            if (NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer)
+            {
+                var networkHandlerHost = Object.Instantiate(networkPrefab, Vector3.zero, Quaternion.identity);
+                networkHandlerHost.GetComponent<NetworkObject>().Spawn();
+                Plugin.mls.LogInfo("VolumeSyncHandler has been created.");
+            }
         }
     }
 }

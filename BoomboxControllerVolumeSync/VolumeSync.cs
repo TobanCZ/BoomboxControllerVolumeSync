@@ -23,32 +23,23 @@ namespace BoomboxControllerVolumeSync
 
         private void onPlayerJoin(ulong obj)
         {
-            if(IsServer)
-                ActivateVolumeSyncClientRpc(syncedVolume, obj);
+            if (IsServer)
+                ActivateVolumeSyncClientRpc(syncedVolume);
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void ActivateVolumeSyncServerRPC(float newVolume, ServerRpcParams serverRpcParams = default)
         {
-            foreach (ulong clientId in NetworkManager.Singleton.ConnectedClients.Keys)
-            {
-                if (clientId != serverRpcParams.Receive.SenderClientId)
-                {
-                    ActivateVolumeSyncClientRpc(newVolume, clientId);
-                }
-            }
+            ActivateVolumeSyncClientRpc(newVolume);
             Plugin.mls.LogInfo("ActivateVolumeSyncServerRPC: Activating Volume sync. newVolume: " + newVolume);
         }
 
         [ClientRpc]
-        public void ActivateVolumeSyncClientRpc(float newVolume, ulong targetClientId)
+        public void ActivateVolumeSyncClientRpc(float newVolume)
         {
-            if (IsClient && NetworkManager.Singleton.LocalClientId == targetClientId)
-            {
-                syncedVolume = newVolume;
-                updateCache();
-                Plugin.mls.LogInfo("ActivateVolumeSyncClientRpc: Activating Volume sync locally. newVolume: " + newVolume);
-            }
+             syncedVolume = newVolume;
+             updateCache();
+             Plugin.mls.LogInfo("ActivateVolumeSyncClientRpc: Activating Volume sync locally. newVolume: " + newVolume);
         }
 
         private void updateCache()
