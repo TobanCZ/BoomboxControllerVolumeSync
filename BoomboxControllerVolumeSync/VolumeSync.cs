@@ -7,7 +7,7 @@ namespace BoomboxControllerVolumeSync
 {
     internal class VolumeSync : NetworkBehaviour
     {
-        private float syncedVolume = 1f;
+        private float syncedVolume = 0.5f;
         internal static VolumeSync Instance { get; private set; }
 
         public override void OnNetworkSpawn()
@@ -15,72 +15,44 @@ namespace BoomboxControllerVolumeSync
             base.OnNetworkSpawn();
 
             if ((NetworkManager.Singleton.IsHost || NetworkManager.Singleton.IsServer) && Instance != null)
+            {
                 Instance.gameObject.GetComponent<NetworkObject>().Despawn();
+            }
+
             Instance = this;
 
-            NetworkManager.Singleton.OnClientConnectedCallback += onPlayerJoin;
+            NetworkManager.Singleton.OnClientConnectedCallback += OnPlayerJoin;
         }
 
-        private void onPlayerJoin(ulong obj)
+        private void OnPlayerJoin(ulong playerId)
         {
             if (IsServer)
-                ActivateVolumeSyncClientRpc(syncedVolume);
+            {
+                ActivateVolumeSyncClientOnJoinRpc(playerId, syncedVolume);
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void ActivateVolumeSyncServerRPC(float newVolume, ServerRpcParams serverRpcParams = default)
         {
             ActivateVolumeSyncClientRpc(newVolume);
-            Plugin.mls.LogInfo("ActivateVolumeSyncServerRPC: Activating Volume sync. newVolume: " + newVolume);
         }
 
         [ClientRpc]
         public void ActivateVolumeSyncClientRpc(float newVolume)
         {
-             syncedVolume = newVolume;
-             updateCache();
-             Plugin.mls.LogInfo("ActivateVolumeSyncClientRpc: Activating Volume sync locally. newVolume: " + newVolume);
+            syncedVolume = newVolume;
+            BoomboxController.BoomboxController.boomboxItem.boomboxAudio.volume = syncedVolume;
         }
 
-        private void updateCache()
+        [ClientRpc]
+        public void ActivateVolumeSyncClientOnJoinRpc(ulong targetPlayerId, float newVolume)
         {
-            var cache = LoadCache();
-            
-            if(cache != null)
+            if (IsClient && NetworkManager.Singleton.LocalClientId == targetPlayerId)
             {
-                SaveCache(syncedVolume, cache.UpButton, cache.DownButton);
+                syncedVolume = newVolume;
+                BoomboxController.BoomboxController.boomboxItem.boomboxAudio.volume = syncedVolume;
             }
-            else
-            {
-                SaveCache(syncedVolume, null, null);
-            }
-        }
-
-        private void SaveCache(float vol, string up, string down)
-        {
-            BoomboxController.BoomboxController.Cache cache = new BoomboxController.BoomboxController.Cache();
-            cache.Volume = vol;
-            cache.UpButton = up;
-            cache.DownButton = down;
-            string json = JsonConvert.SerializeObject(cache);
-            using (StreamWriter sw = new StreamWriter(@"BoomboxController\cache"))
-            {
-                sw.WriteLine(json);
-            }
-        }
-
-        private BoomboxController.BoomboxController.Cache LoadCache()
-        {
-            string json = String.Empty;
-            if (File.Exists(@"BoomboxController\cache"))
-            {
-                using (StreamReader sr = new StreamReader(@"BoomboxController\cache"))
-                {
-                    json = sr.ReadToEnd();
-                }
-                return JsonConvert.DeserializeObject<BoomboxController.BoomboxController.Cache>(json);
-            }
-            return null;
         }
     }
 }

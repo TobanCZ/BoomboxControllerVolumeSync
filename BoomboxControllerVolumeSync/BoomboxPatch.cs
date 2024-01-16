@@ -7,7 +7,7 @@ namespace BoomboxControllerVolumeSync
        
         [HarmonyPatch(typeof(BoomboxController.BoomboxController), nameof(BoomboxController.BoomboxController.SaveCache))]
         [HarmonyPostfix]
-        private static void SaveCachePostFix(float vol, string up, string down)
+        private static void SaveCachePostFix(float vol)
         {
             VolumeSync.Instance.ActivateVolumeSyncServerRPC(vol);
         }

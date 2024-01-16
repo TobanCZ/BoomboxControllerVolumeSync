@@ -1,11 +1,9 @@
 ﻿using HarmonyLib;
-
 using Unity.Netcode;
 using UnityEngine;
 using System.Collections;
 using UnityEngine.Networking;
 using System.Reflection;
-
 
 namespace BoomboxControllerVolumeSync
 {
@@ -37,7 +35,6 @@ namespace BoomboxControllerVolumeSync
             {
                 var networkHandlerHost = Object.Instantiate(networkPrefab, Vector3.zero, Quaternion.identity);
                 networkHandlerHost.GetComponent<NetworkObject>().Spawn();
-                Plugin.mls.LogInfo("VolumeSyncHandler has been created.");
             }
         }
     }
