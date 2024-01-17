@@ -1,6 +1,6 @@
 {
-    "name": "Boombox Controller Volume Sync",
-    "version_number": "1.0.0",
+    "name": "BoomboxControllerVolumeSync",
+    "version_number": "1.0.1",
     "website_url": "https://github.com/TobanCZ/BoomboxControllerVolumeSync",
     "description": "Lethal Company mod that adds volume synchronization to Boombox Controller mod",
     "dependencies": [
